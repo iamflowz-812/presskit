@@ -1,14 +1,5 @@
 [
   {
-    "id": 1,
-    "date": "18.07.2026",
-    "title": "BAD BEHAVIOUR",
-    "support": "Gourski, 4U, tillted",
-    "city": "Mönchengladbach, DE",
-    "badge": "Open Air",
-    "upcoming": true
-  },
-  {
     "id": 4,
     "date": "15.08.2026",
     "title": "BREAKZONE Festival",
@@ -25,6 +16,15 @@
     "city": "TBA",
     "badge": "Club",
     "upcoming": true
+  },
+  {
+    "id": 1,
+    "date": "18.07.2026",
+    "title": "BAD BEHAVIOUR",
+    "support": "Gourski, 4U, tillted",
+    "city": "Mönchengladbach, DE",
+    "badge": "Open Air",
+    "upcoming": false
   },
   {
     "id": 6,
