@@ -1,6 +1,6 @@
 [
   {
-    "title": "Booking Request",
+    "title": "BOOKING REQUEST",
     "links": [
       {
         "title": "Submit your request here",
@@ -12,24 +12,17 @@
     ]
   },
   {
-    "title": "Sets",
+    "title": "LIVESETS & MIXTAPES",
     "links": [
       {
-        "title": "Yearmix 2025",
+        "title": "YEARMIX 2025",
         "url": "https://soundcloud.com/iamflowz/yearmix-2025",
         "image": "assets/links/cover_yearmix.jpg",
         "icon": "",
         "target": "_blank"
       },
       {
-        "title": "Subvoid Agency Showcase Night Liveset",
-        "url": "https://www.youtube.com/watch?v=gU0MKgpUH-E",
-        "image": "assets/links/cover_subvoid.jpg",
-        "icon": "",
-        "target": "_blank"
-      },
-      {
-        "title": "Container Rave Liveset",
+        "title": "Container Rave 2025",
         "url": "https://www.youtube.com/watch?v=KE9rXPWRyV0",
         "image": "assets/links/cover_container.jpg",
         "icon": "",
@@ -41,11 +34,18 @@
         "image": "assets/links/cover_pollerwiesen.jpg",
         "icon": "",
         "target": "_blank"
+      },
+      {
+        "title": "808 FAMILY - REVOLVE (B2B Nelanova)",
+        "url": "https://www.youtube.com/watch?v=4bRfsOlkAhE",
+        "image": "assets/links/cover_808-family-b2b-nelanova.jpg",
+        "icon": "",
+        "target": "_blank"
       }
     ]
   },
   {
-    "title": "Socials",
+    "title": "SOCIALS",
     "links": [
       {
         "title": "Instagram",
