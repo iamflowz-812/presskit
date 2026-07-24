@@ -400,8 +400,8 @@
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom: 1px solid var(--border); padding-bottom:0.5rem;">
             <input type="text" value="${escapeHtml(sec.title)}" onchange="localLinks[${catIdx}].title = this.value" style="font-size:1.1rem; font-weight:bold; margin-bottom:0; width:50%;">
             <div class="controls">
-              <button class="btn-arrow" onclick="moveCategory(${catIdx}, -1)" ${isFirstCat ? 'disabled' : ''}>↑ Kategorie</button>
-              <button class="btn-arrow" onclick="moveCategory(${catIdx}, 1)" ${isLastCat ? 'disabled' : ''}>↓ Kategorie</button>
+              <button class="btn-arrow" onclick="moveCategory(${catIdx}, -1)" ${isFirstCat ? 'disabled' : ''}>↑</button>
+              <button class="btn-arrow" onclick="moveCategory(${catIdx}, 1)" ${isLastCat ? 'disabled' : ''}>↓</button>
               <button class="btn-delete" onclick="deleteCategory(${catIdx})">Kategorie Löschen</button>
             </div>
           </div>
