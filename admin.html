@@ -114,7 +114,7 @@
     <div class="nav-tabs">
       <button class="nav-tab active" id="tabBtnShows" onclick="switchTab('shows')">🎤 Shows</button>
       <button class="nav-tab" id="tabBtnLinks" onclick="switchTab('links')">🔗 Links</button>
-      <button class="nav-tab" id="tabBtnAssets" onclick="switchTab('assets')">🖼️ Assets Manager</button>
+      <button class="nav-tab" id="tabBtnAssets" onclick="switchTab('assets')">🖼 Asset Manager</button>
     </div>
     
     <!-- ── TAB 1: SHOWS MANAGER ── -->
@@ -148,7 +148,7 @@
 
     <!-- ── TAB 3: ASSETS MANAGER ── -->
     <div id="tabAssets" style="display: none;">
-      <h3>Neues Bild hochladen (Ordner: /assets)</h3>
+      <h3>Neues Bild hochladen (Ordner: /assets/links)</h3>
       <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
         📁 <strong>Datei hierher ziehen</strong> oder klicken zum Auswählen
         <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.5rem;">Unterstützte Formate: JPG, PNG, WEBP, SVG</p>
@@ -156,7 +156,7 @@
       </div>
 
       <hr>
-      <h3>Vorhandene Bilder in /assets</h3>
+      <h3>Vorhandene Bilder in /assets/links</h3>
       <div class="assets-grid" id="assetsGrid">Lade Assets...</div>
     </div>
 
@@ -168,6 +168,7 @@
     const repoName = "website";        
     const filePathShows = "data/shows.json";            
     const filePathLinks = "data/links.json";            
+    const assetFolderPath = "assets/links"; // Zielordner für Linktree-Bilder
     const ALLOWED_USER = "admin";            
     
     const ENCRYPTED_TOKEN = "U2FsdGVkX19s84wwgE8UXe/gh1wnELEmc226yspUe+wdSwqbyimgD0trs6H1RDMH3P8psA4DTpb5+PZD05SASLbYnHCAi4LtQgcUeeGFIocY53t2qIcZalLzOp59Gj+Y1Eme+FuILwc2OpV7wQezsQ=="; 
@@ -201,7 +202,7 @@
         document.getElementById('tabLinks').style.display = 'block';
         document.getElementById('tabBtnLinks').classList.add('active');
         if (localLinks.length === 0) loadLinksFromGitHub();
-        loadAssetsFromGitHub(); // Lade Bilder auch für die Dropdown-Auswahl
+        loadAssetsFromGitHub();
       } else if (tab === 'assets') {
         document.getElementById('tabAssets').style.display = 'block';
         document.getElementById('tabBtnAssets').classList.add('active');
@@ -420,7 +421,6 @@
           const isFirstLink = linkIdx === 0;
           const isLastLink = linkIdx === sec.links.length - 1;
 
-          // Erstelle Bild-Optionen für das Dropdown
           let assetOptions = `<option value="">-- Kein Bild / Standard --</option>`;
           availableAssets.forEach(assetPath => {
             const selected = (link.image === assetPath) ? 'selected' : '';
@@ -548,14 +548,18 @@
     function loadAssetsFromGitHub() {
       if (!decryptedToken) return;
 
-      fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/assets`, {
+      fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${assetFolderPath}`, {
         headers: { "Authorization": `token ${decryptedToken}` }
       })
-      .then(res => res.json())
+      .then(res => {
+        if (res.status === 404) return []; // Falls Ordner noch nicht existiert
+        return res.json();
+      })
       .then(files => {
+        if(!Array.isArray(files)) files = [];
         availableAssets = files
           .filter(f => f.type === 'file' && f.name.match(/\.(jpg|jpeg|png|webp|svg)$/i))
-          .map(f => `assets/${f.name}`);
+          .map(f => `${assetFolderPath}/${f.name}`);
         
         renderAssetsGrid(files);
       })
@@ -569,7 +573,7 @@
       const imageFiles = files.filter(f => f.type === 'file' && f.name.match(/\.(jpg|jpeg|png|webp|svg)$/i));
 
       if (imageFiles.length === 0) {
-        grid.innerHTML = '<p style="color:var(--text-muted);">Keine Bilder in /assets gefunden.</p>';
+        grid.innerHTML = `<p style="color:var(--text-muted);">Keine Bilder in /${assetFolderPath} gefunden.</p>`;
         return;
       }
 
@@ -577,7 +581,7 @@
         grid.innerHTML += `
           <div class="asset-card">
             <img src="${file.download_url}" alt="${file.name}">
-            <div>assets/${file.name}</div>
+            <div>${assetFolderPath}/${file.name}</div>
           </div>
         `;
       });
@@ -606,7 +610,6 @@
       uploadFileToGitHub(file);
     }
 
-    // Direktes Droppen eines Bildes auf ein spezifisches Link-Feld
     function handleLinkImageDrop(e, catIdx, linkIdx) {
       e.preventDefault();
       document.getElementById(`link-box-${catIdx}-${linkIdx}`).classList.remove('dragover');
@@ -629,11 +632,9 @@
           new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
         );
 
-        // Dateinamen bereinigen (Sonderzeichen entfernen)
         const cleanFileName = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, '_');
-        const uploadPath = `assets/${cleanFileName}`;
+        const uploadPath = `${assetFolderPath}/${cleanFileName}`;
 
-        // SHA prüfen, falls Datei überschrieben werden soll
         fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${uploadPath}`, {
           headers: { "Authorization": `token ${decryptedToken}` }
         })
@@ -648,7 +649,7 @@
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
-              message: `Asset hochgeladen: ${cleanFileName}`,
+              message: `Link-Asset hochgeladen: ${cleanFileName}`,
               content: base64,
               sha: sha
             })
@@ -659,9 +660,9 @@
           return res.json();
         })
         .then(() => {
-          alert(`Bild 'assets/${cleanFileName}' erfolgreich hochgeladen!`);
+          alert(`Bild '${uploadPath}' erfolgreich hochgeladen!`);
           loadAssetsFromGitHub();
-          if (callback) callback(`assets/${cleanFileName}`);
+          if (callback) callback(uploadPath);
         })
         .catch(err => alert("Upload-Fehler: " + err.message));
       };
