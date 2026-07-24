@@ -1,0 +1,94 @@
+[
+  {
+    "title": "Booking Request",
+    "links": [
+      {
+        "title": "Submit your request here",
+        "url": "https://iamflowz.de/booking",
+        "image": "",
+        "icon": "mail",
+        "target": "_self"
+      }
+    ]
+  },
+  {
+    "title": "Sets",
+    "links": [
+      {
+        "title": "Yearmix 2025",
+        "url": "https://soundcloud.com/iamflowz/yearmix-2025",
+        "image": "assets/cover_yearmix.jpg",
+        "icon": "",
+        "target": "_blank"
+      },
+      {
+        "title": "Subvoid Agency Showcase Night Liveset",
+        "url": "https://www.youtube.com/watch?v=gU0MKgpUH-E",
+        "image": "assets/cover_subvoid.jpg",
+        "icon": "",
+        "target": "_blank"
+      },
+      {
+        "title": "Container Rave Liveset",
+        "url": "https://www.youtube.com/watch?v=KE9rXPWRyV0",
+        "image": "assets/cover_container.jpg",
+        "icon": "",
+        "target": "_blank"
+      },
+      {
+        "title": "Pollerwiesen DJ Set",
+        "url": "https://www.youtube.com/watch?v=hnrPO8uTtQs",
+        "image": "assets/cover_pollerwiesen.jpg",
+        "icon": "",
+        "target": "_blank"
+      }
+    ]
+  },
+  {
+    "title": "Socials",
+    "links": [
+      {
+        "title": "Instagram",
+        "url": "https://instagram.com/iam.flowz",
+        "image": "",
+        "icon": "",
+        "target": "_blank"
+      },
+      {
+        "title": "Spotify",
+        "url": "https://open.spotify.com/user/1127328760?si=88fa67b909ac4202",
+        "image": "",
+        "icon": "",
+        "target": "_blank"
+      },
+      {
+        "title": "SoundCloud",
+        "url": "https://soundcloud.com/iamflowz",
+        "image": "",
+        "icon": "",
+        "target": "_blank"
+      },
+      {
+        "title": "YouTube",
+        "url": "https://www.youtube.com/@iamflowz",
+        "image": "",
+        "icon": "",
+        "target": "_blank"
+      },
+      {
+        "title": "TikTok",
+        "url": "https://tiktok.com/@iam.flowz",
+        "image": "",
+        "icon": "",
+        "target": "_blank"
+      },
+      {
+        "title": "Songkick",
+        "url": "https://www.songkick.com/artists/9706799-flowz-de",
+        "image": "",
+        "icon": "",
+        "target": "_blank"
+      }
+    ]
+  }
+]
