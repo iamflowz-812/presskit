@@ -34,7 +34,7 @@
     hr { border: 0; height: 1px; background: var(--border); margin: 2rem 0; }
 
     /* TAB NAVIGATION */
-    .nav-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .nav-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
     .nav-tab { padding: 0.8rem 1.5rem; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; font-weight: 600; text-transform: uppercase; }
     .nav-tab.active { background: var(--red); color: #fff; border-color: var(--red); }
 
@@ -66,8 +66,24 @@
     .edit-form { display: none; background: #050505; padding: 1rem; margin-top: 0.5rem; border-left: 3px solid var(--orange); }
 
     /* LINKS EDITOR SPECIFICS */
-    .link-entry { background: #080808; border: 1px solid var(--border); padding: 1rem; margin-top: 0.5rem; border-left: 3px solid var(--blue); }
+    .link-entry { background: #080808; border: 1px solid var(--border); padding: 1rem; margin-top: 0.5rem; border-left: 3px solid var(--blue); transition: border-color 0.2s; }
+    .link-entry.dragover { border-color: var(--green); background: #111; }
     .link-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+
+    /* ASSET UPLOAD DRAG & DROP AREA */
+    .drop-zone {
+      border: 2px dashed var(--blue);
+      padding: 3rem 1.5rem;
+      text-align: center;
+      background: #080808;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      margin-bottom: 1.5rem;
+    }
+    .drop-zone.dragover { background: #161616; border-color: var(--green); }
+    .assets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .asset-card { background: var(--surface-item); border: 1px solid var(--border); padding: 0.5rem; text-align: center; font-size: 0.75rem; word-break: break-all; }
+    .asset-card img { width: 100%; height: 90px; object-fit: cover; border-radius: 4px; margin-bottom: 0.5rem; }
 
     #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background: #0d0d0d; z-index: 1000; display: flex; justify-content: center; align-items: center; }
     .login-box { background: var(--surface); padding: 2.5rem; border: 1px solid var(--border); width: 100%; max-width: 400px; text-align: center; }
@@ -98,6 +114,7 @@
     <div class="nav-tabs">
       <button class="nav-tab active" id="tabBtnShows" onclick="switchTab('shows')">🎤 Shows</button>
       <button class="nav-tab" id="tabBtnLinks" onclick="switchTab('links')">🔗 Links</button>
+      <button class="nav-tab" id="tabBtnAssets" onclick="switchTab('assets')">🖼️ Assets Manager</button>
     </div>
     
     <!-- ── TAB 1: SHOWS MANAGER ── -->
@@ -129,6 +146,20 @@
       <button class="btn-save" onclick="saveLinksToGitHub()">Link-Änderungen speichern</button>
     </div>
 
+    <!-- ── TAB 3: ASSETS MANAGER ── -->
+    <div id="tabAssets" style="display: none;">
+      <h3>Neues Bild hochladen (Ordner: /assets)</h3>
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        📁 <strong>Datei hierher ziehen</strong> oder klicken zum Auswählen
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.5rem;">Unterstützte Formate: JPG, PNG, WEBP, SVG</p>
+        <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFileSelect(this.files)">
+      </div>
+
+      <hr>
+      <h3>Vorhandene Bilder in /assets</h3>
+      <div class="assets-grid" id="assetsGrid">Lade Assets...</div>
+    </div>
+
   </div>
 
   <script>
@@ -144,27 +175,37 @@
 
     let decryptedToken = "";
     
-    // Shows State
+    // States
     let localShows = [];
     let fileShaShows = "";
 
-    // Links State
     let localLinks = [];
     let fileShaLinks = "";
 
+    let availableAssets = [];
+
     // TAB MANAGEMENT
     function switchTab(tab) {
+      document.getElementById('tabShows').style.display = 'none';
+      document.getElementById('tabLinks').style.display = 'none';
+      document.getElementById('tabAssets').style.display = 'none';
+
+      document.getElementById('tabBtnShows').classList.remove('active');
+      document.getElementById('tabBtnLinks').classList.remove('active');
+      document.getElementById('tabBtnAssets').classList.remove('active');
+
       if (tab === 'shows') {
         document.getElementById('tabShows').style.display = 'block';
-        document.getElementById('tabLinks').style.display = 'none';
         document.getElementById('tabBtnShows').classList.add('active');
-        document.getElementById('tabBtnLinks').classList.remove('active');
-      } else {
-        document.getElementById('tabShows').style.display = 'none';
+      } else if (tab === 'links') {
         document.getElementById('tabLinks').style.display = 'block';
-        document.getElementById('tabBtnShows').classList.remove('active');
         document.getElementById('tabBtnLinks').classList.add('active');
         if (localLinks.length === 0) loadLinksFromGitHub();
+        loadAssetsFromGitHub(); // Lade Bilder auch für die Dropdown-Auswahl
+      } else if (tab === 'assets') {
+        document.getElementById('tabAssets').style.display = 'block';
+        document.getElementById('tabBtnAssets').classList.add('active');
+        loadAssetsFromGitHub();
       }
     }
 
@@ -187,6 +228,8 @@
           decryptedToken = decrypted;
           document.getElementById("loginOverlay").style.display = "none";
           loadShowsFromGitHub();
+          loadAssetsFromGitHub();
+          setupDragAndDrop();
         } else {
           errorEl.style.display = "block";
         }
@@ -377,10 +420,20 @@
           const isFirstLink = linkIdx === 0;
           const isLastLink = linkIdx === sec.links.length - 1;
 
+          // Erstelle Bild-Optionen für das Dropdown
+          let assetOptions = `<option value="">-- Kein Bild / Standard --</option>`;
+          availableAssets.forEach(assetPath => {
+            const selected = (link.image === assetPath) ? 'selected' : '';
+            assetOptions += `<option value="${assetPath}" ${selected}>${assetPath}</option>`;
+          });
+
           linksHtml += `
-            <div class="link-entry">
+            <div class="link-entry" id="link-box-${catIdx}-${linkIdx}" 
+                 ondragover="event.preventDefault(); this.classList.add('dragover');" 
+                 ondragleave="this.classList.remove('dragover');" 
+                 ondrop="handleLinkImageDrop(event, ${catIdx}, ${linkIdx})">
               <div class="link-header">
-                <span style="font-size:0.8rem; color:var(--text-muted);">Link #${linkIdx + 1}</span>
+                <span style="font-size:0.8rem; color:var(--text-muted);">Link #${linkIdx + 1} (Bild per Drag & Drop hier ablegen)</span>
                 <div class="controls">
                   <button class="btn-arrow" onclick="moveLinkItem(${catIdx}, ${linkIdx}, -1)" ${isFirstLink ? 'disabled' : ''}>↑</button>
                   <button class="btn-arrow" onclick="moveLinkItem(${catIdx}, ${linkIdx}, 1)" ${isLastLink ? 'disabled' : ''}>↓</button>
@@ -389,7 +442,11 @@
               </div>
               <input type="text" value="${escapeHtml(link.title)}" onchange="localLinks[${catIdx}].links[${linkIdx}].title = this.value" placeholder="Titel / Label">
               <input type="text" value="${escapeHtml(link.url)}" onchange="localLinks[${catIdx}].links[${linkIdx}].url = this.value" placeholder="Ziel URL">
-              <input type="text" value="${escapeHtml(link.image || '')}" onchange="localLinks[${catIdx}].links[${linkIdx}].image = this.value" placeholder="Cover Pfad (z.B. assets/cover.jpg)">
+              
+              <label style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.2rem;">Cover/Asset Bild wählen:</label>
+              <select onchange="localLinks[${catIdx}].links[${linkIdx}].image = this.value">
+                ${assetOptions}
+              </select>
             </div>
           `;
         });
@@ -484,6 +541,132 @@
         loadLinksFromGitHub();
       })
       .catch(err => alert("Speicherfehler: " + err.message));
+    }
+
+
+    // ── ASSETS LOGIK & UPLOAD ──────────────────────────────────
+    function loadAssetsFromGitHub() {
+      if (!decryptedToken) return;
+
+      fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/assets`, {
+        headers: { "Authorization": `token ${decryptedToken}` }
+      })
+      .then(res => res.json())
+      .then(files => {
+        availableAssets = files
+          .filter(f => f.type === 'file' && f.name.match(/\.(jpg|jpeg|png|webp|svg)$/i))
+          .map(f => `assets/${f.name}`);
+        
+        renderAssetsGrid(files);
+      })
+      .catch(err => console.error("Assets konnten nicht geladen werden:", err));
+    }
+
+    function renderAssetsGrid(files) {
+      const grid = document.getElementById('assetsGrid');
+      grid.innerHTML = '';
+
+      const imageFiles = files.filter(f => f.type === 'file' && f.name.match(/\.(jpg|jpeg|png|webp|svg)$/i));
+
+      if (imageFiles.length === 0) {
+        grid.innerHTML = '<p style="color:var(--text-muted);">Keine Bilder in /assets gefunden.</p>';
+        return;
+      }
+
+      imageFiles.forEach(file => {
+        grid.innerHTML += `
+          <div class="asset-card">
+            <img src="${file.download_url}" alt="${file.name}">
+            <div>assets/${file.name}</div>
+          </div>
+        `;
+      });
+    }
+
+    function setupDragAndDrop() {
+      const dropZone = document.getElementById('dropZone');
+
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        handleFileSelect(e.dataTransfer.files);
+      });
+    }
+
+    function handleFileSelect(files) {
+      if (files.length === 0) return;
+      const file = files[0];
+      uploadFileToGitHub(file);
+    }
+
+    // Direktes Droppen eines Bildes auf ein spezifisches Link-Feld
+    function handleLinkImageDrop(e, catIdx, linkIdx) {
+      e.preventDefault();
+      document.getElementById(`link-box-${catIdx}-${linkIdx}`).classList.remove('dragover');
+      
+      const files = e.dataTransfer.files;
+      if (files.length === 0) return;
+
+      const file = files[0];
+      uploadFileToGitHub(file, (assetPath) => {
+        localLinks[catIdx].links[linkIdx].image = assetPath;
+        renderLinksList();
+      });
+    }
+
+    function uploadFileToGitHub(file, callback) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const arrayBuffer = e.target.result;
+        const base64 = btoa(
+          new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+        );
+
+        // Dateinamen bereinigen (Sonderzeichen entfernen)
+        const cleanFileName = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, '_');
+        const uploadPath = `assets/${cleanFileName}`;
+
+        // SHA prüfen, falls Datei überschrieben werden soll
+        fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${uploadPath}`, {
+          headers: { "Authorization": `token ${decryptedToken}` }
+        })
+        .then(res => res.ok ? res.json() : null)
+        .then(existingFile => {
+          const sha = existingFile ? existingFile.sha : undefined;
+
+          return fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${uploadPath}`, {
+            method: "PUT",
+            headers: {
+              "Authorization": `token ${decryptedToken}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              message: `Asset hochgeladen: ${cleanFileName}`,
+              content: base64,
+              sha: sha
+            })
+          });
+        })
+        .then(res => {
+          if (!res.ok) throw new Error("Upload-Fehler auf GitHub.");
+          return res.json();
+        })
+        .then(() => {
+          alert(`Bild 'assets/${cleanFileName}' erfolgreich hochgeladen!`);
+          loadAssetsFromGitHub();
+          if (callback) callback(`assets/${cleanFileName}`);
+        })
+        .catch(err => alert("Upload-Fehler: " + err.message));
+      };
+
+      reader.readAsArrayBuffer(file);
     }
 
     function escapeHtml(text) {
