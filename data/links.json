@@ -1,6 +1,6 @@
 [
   {
-    "title": "BOOKING REQUEST",
+    "title": "Booking Request",
     "links": [
       {
         "title": "Submit your request here",
@@ -12,40 +12,40 @@
     ]
   },
   {
-    "title": "LIVESETS & MIXTAPES",
+    "title": "Sets",
     "links": [
       {
-        "title": "YEARMIX 2025",
+        "title": "Yearmix 2025",
         "url": "https://soundcloud.com/iamflowz/yearmix-2025",
-        "image": "assets/cover_yearmix.jpg",
+        "image": "assets/links/cover_yearmix.jpg",
         "icon": "",
         "target": "_blank"
       },
       {
-        "title": "Container Rave 2025",
+        "title": "Subvoid Agency Showcase Night Liveset",
+        "url": "https://www.youtube.com/watch?v=gU0MKgpUH-E",
+        "image": "assets/links/cover_subvoid.jpg",
+        "icon": "",
+        "target": "_blank"
+      },
+      {
+        "title": "Container Rave Liveset",
         "url": "https://www.youtube.com/watch?v=KE9rXPWRyV0",
-        "image": "assets/cover_container.jpg",
+        "image": "assets/links/cover_container.jpg",
         "icon": "",
         "target": "_blank"
       },
       {
         "title": "Pollerwiesen DJ Set",
         "url": "https://www.youtube.com/watch?v=hnrPO8uTtQs",
-        "image": "assets/cover_pollerwiesen.jpg",
-        "icon": "",
-        "target": "_blank"
-      },
-      {
-        "title": "808 FAMILY - REVOLVE (B2B Nelanova)",
-        "url": "https://https://www.youtube.com/watch?v=4bRfsOlkAhE",
-        "image": "assets/cover_808-family-b2b-nelanova.jpg",
+        "image": "assets/links/cover_pollerwiesen.jpg",
         "icon": "",
         "target": "_blank"
       }
     ]
   },
   {
-    "title": "SOCIALS",
+    "title": "Socials",
     "links": [
       {
         "title": "Instagram",
