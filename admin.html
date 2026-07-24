@@ -7,33 +7,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
     /* ── LOKALE FONTS INJEKTION ── */
-
-    /* Inter Light (300) */
-    @font-face {
-      font-family: 'Inter';
-      font-style: normal;
-      font-weight: 300;
-      font-display: swap;
-      src: url('fonts/inter-v18-latin-300.woff2') format('woff2');
-    }
-
-    /* Inter Regular (400) */
-    @font-face {
-      font-family: 'Inter';
-      font-style: normal;
-      font-weight: 400;
-      font-display: swap;
-      src: url('fonts/inter-v18-latin-regular.woff2') format('woff2');
-    }
-
-    /* Inter Semi-Bold (600) */
-    @font-face {
-      font-family: 'Inter';
-      font-style: normal;
-      font-weight: 600;
-      font-display: swap;
-      src: url('fonts/inter-v18-latin-600.woff2') format('woff2');
-    }
+    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 300; font-display: swap; src: url('fonts/inter-v18-latin-300.woff2') format('woff2'); }
+    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/inter-v18-latin-regular.woff2') format('woff2'); }
+    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('fonts/inter-v18-latin-600.woff2') format('woff2'); }
 
     /* ── DASHBOARD STYLES ── */
     :root {
@@ -57,6 +33,11 @@
     h3 { font-size: 1.2rem; margin: 1.5rem 0 1rem 0; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
     hr { border: 0; height: 1px; background: var(--border); margin: 2rem 0; }
 
+    /* TAB NAVIGATION */
+    .nav-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .nav-tab { padding: 0.8rem 1.5rem; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; font-weight: 600; text-transform: uppercase; }
+    .nav-tab.active { background: var(--red); color: #fff; border-color: var(--red); }
+
     .form-group { background: var(--surface); padding: 1.5rem; border: 1px solid var(--border); margin-bottom: 1.5rem; }
     input[type="text"], input[type="password"], select { 
       width: 100%; padding: 0.75rem; margin-bottom: 1rem; 
@@ -75,7 +56,7 @@
     .btn-arrow { background: #2a2a2a; color: #fff; width: 35px; padding: 0.5rem 0; font-size: 1rem; }
     .btn-arrow:disabled { opacity: 0.2; cursor: not-allowed; }
 
-    .show-item { background: var(--surface); border: 1px solid var(--border); padding: 1rem; margin-bottom: 0.75rem; }
+    .show-item, .link-category-card { background: var(--surface); border: 1px solid var(--border); padding: 1rem; margin-bottom: 1rem; }
     .show-row-view { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
     .show-item strong { font-size: 1.05rem; display: inline-block; margin-bottom: 0.2rem; }
     .show-info p { font-size: 0.85rem; color: var(--text-muted); }
@@ -83,6 +64,10 @@
     .controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
     
     .edit-form { display: none; background: #050505; padding: 1rem; margin-top: 0.5rem; border-left: 3px solid var(--orange); }
+
+    /* LINKS EDITOR SPECIFICS */
+    .link-entry { background: #080808; border: 1px solid var(--border); padding: 1rem; margin-top: 0.5rem; border-left: 3px solid var(--blue); }
+    .link-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
 
     #loginOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background: #0d0d0d; z-index: 1000; display: flex; justify-content: center; align-items: center; }
     .login-box { background: var(--surface); padding: 2.5rem; border: 1px solid var(--border); width: 100%; max-width: 400px; text-align: center; }
@@ -106,41 +91,82 @@
   </div>
 
   <div class="container">
-    <h1>Show Manager</h1>
+    <h1>Dashboard Manager</h1>
     <p style="font-size: 0.85rem; color: var(--green); margin-bottom: 1.5rem;">● Eingeloggt als Administrator</p>
+
+    <!-- TABS SWITCHER -->
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tabBtnShows" onclick="switchTab('shows')">🎤 Shows</button>
+      <button class="nav-tab" id="tabBtnLinks" onclick="switchTab('links')">🔗 Links (Linktree)</button>
+    </div>
     
-    <h3>Neue Show hinzufügen</h3>
-    <div class="form-group">
-      <input type="text" id="newDate" placeholder="Datum (z.B. 01.01.2030)">
-      <input type="text" id="newTitle" placeholder="Event Name">
-      <input type="text" id="newSupport" placeholder="Support / Line-Up">
-      <input type="text" id="newCity" placeholder="Stadt, Land">
-      <input type="text" id="newBadge" placeholder="Location-Typ (z.B. Club, Festival, Event)">
-      <label><input type="checkbox" id="newUpcoming" checked> Als "UPCOMING" markieren</label>
-      <button class="btn-add" onclick="addShow()">Zur Liste hinzufügen</button>
+    <!-- ── TAB 1: SHOWS MANAGER ── -->
+    <div id="tabShows">
+      <h3>Neue Show hinzufügen</h3>
+      <div class="form-group">
+        <input type="text" id="newDate" placeholder="Datum (z.B. 01.01.2030)">
+        <input type="text" id="newTitle" placeholder="Event Name">
+        <input type="text" id="newSupport" placeholder="Support / Line-Up">
+        <input type="text" id="newCity" placeholder="Stadt, Land">
+        <input type="text" id="newBadge" placeholder="Location-Typ (z.B. Club, Festival, Event)">
+        <label><input type="checkbox" id="newUpcoming" checked> Als "UPCOMING" markieren</label>
+        <button class="btn-add" onclick="addShow()">Zur Liste hinzufügen</button>
+      </div>
+
+      <hr>
+      <h3>Aktuelle Shows im Repository</h3>
+      <div id="adminList">Lade Daten von GitHub...</div>
+      
+      <button class="btn-save" onclick="saveShowsToGitHub()">Show-Änderungen speichern</button>
     </div>
 
-    <hr>
-    <h3>Aktuelle Shows im Repository</h3>
-    <div id="adminList">Lade Daten von GitHub...</div>
-    
-    <button class="btn-save" onclick="saveToGitHub()">Änderungen speichern</button>
+    <!-- ── TAB 2: LINKS MANAGER ── -->
+    <div id="tabLinks" style="display: none;">
+      <button class="btn-action" onclick="addLinkCategory()" style="margin-bottom: 1.5rem; background: var(--blue);">+ Neue Kategorie/Gruppe erstellen</button>
+      
+      <div id="linksAdminList">Lade Link-Daten...</div>
+      
+      <button class="btn-save" onclick="saveLinksToGitHub()">Link-Änderungen speichern</button>
+    </div>
+
   </div>
 
   <script>
     // ── CONFIGURATION ───────────────────────────────────────
     const repoOwner = "iamflowz-812"; 
-    const repoName = "website";       
-    const filePath = "data/shows.json";           
+    const repoName = "website";        
+    const filePathShows = "data/shows.json";            
+    const filePathLinks = "data/links.json";            
     const ALLOWED_USER = "admin";            
     
-    // ACHTUNG: Hier fügst du deinen generierten Zeichensalat ein!
     const ENCRYPTED_TOKEN = "U2FsdGVkX19s84wwgE8UXe/gh1wnELEmc226yspUe+wdSwqbyimgD0trs6H1RDMH3P8psA4DTpb5+PZD05SASLbYnHCAi4LtQgcUeeGFIocY53t2qIcZalLzOp59Gj+Y1Eme+FuILwc2OpV7wQezsQ=="; 
     // ────────────────────────────────────────────────────────
 
     let decryptedToken = "";
+    
+    // Shows State
     let localShows = [];
-    let fileSha = "";
+    let fileShaShows = "";
+
+    // Links State
+    let localLinks = [];
+    let fileShaLinks = "";
+
+    // TAB MANAGEMENT
+    function switchTab(tab) {
+      if (tab === 'shows') {
+        document.getElementById('tabShows').style.display = 'block';
+        document.getElementById('tabLinks').style.display = 'none';
+        document.getElementById('tabBtnShows').classList.add('active');
+        document.getElementById('tabBtnLinks').classList.remove('active');
+      } else {
+        document.getElementById('tabShows').style.display = 'none';
+        document.getElementById('tabLinks').style.display = 'block';
+        document.getElementById('tabBtnShows').classList.remove('active');
+        document.getElementById('tabBtnLinks').classList.add('active');
+        if (localLinks.length === 0) loadLinksFromGitHub();
+      }
+    }
 
     // 1. LOGIN LOGIK
     function handleLogin() {
@@ -160,7 +186,7 @@
         if (decrypted.startsWith("ghp_") || decrypted.startsWith("github_pat_")) {
           decryptedToken = decrypted;
           document.getElementById("loginOverlay").style.display = "none";
-          loadDataFromGitHub();
+          loadShowsFromGitHub();
         } else {
           errorEl.style.display = "block";
         }
@@ -169,30 +195,24 @@
       }
     }
 
-    // 2. DATEN VON GITHUB LADEN
-    function loadDataFromGitHub() {
+    // ── SHOWS LOGIK ──────────────────────────────────────────
+    function loadShowsFromGitHub() {
       if (!decryptedToken) return;
 
-      const headers = { "Authorization": `token ${decryptedToken}` };
-
-      fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, { headers })
-        .then(res => {
-          if (!res.ok) throw new Error(`Status ${res.status}.`);
-          return res.json();
-        })
-        .then(data => {
-          fileSha = data.sha;
-          const decodedContent = decodeURIComponent(escape(atob(data.content)));
-          localShows = JSON.parse(decodedContent);
-          renderAdminList();
-        })
-        .catch(err => {
-          alert("Fehler beim Laden der GitHub-Daten: " + err.message);
-        });
+      fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePathShows}`, {
+        headers: { "Authorization": `token ${decryptedToken}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        fileShaShows = data.sha;
+        const decoded = decodeURIComponent(escape(atob(data.content)));
+        localShows = JSON.parse(decoded);
+        renderShowsList();
+      })
+      .catch(err => alert("Fehler beim Laden der Shows: " + err.message));
     }
 
-    // 3. LISTE REPRÄSENTIEREN
-    function renderAdminList() {
+    function renderShowsList() {
       const list = document.getElementById('adminList');
       list.innerHTML = '';
       
@@ -257,7 +277,7 @@
       localShows[index].support = document.getElementById(`editSupport-${index}`).value;
       localShows[index].city = document.getElementById(`editCity-${index}`).value;
       localShows[index].badge = document.getElementById(`editBadge-${index}`).value;
-      renderAdminList();
+      renderShowsList();
     }
 
     function moveShow(index, direction) {
@@ -266,18 +286,18 @@
       const temp = localShows[index];
       localShows[index] = localShows[targetIndex];
       localShows[targetIndex] = temp;
-      renderAdminList();
+      renderShowsList();
     }
 
     function toggleUpcoming(index) {
       localShows[index].upcoming = !localShows[index].upcoming;
-      renderAdminList();
+      renderShowsList();
     }
 
     function deleteShow(index) {
       if(confirm(`"${localShows[index].title}" löschen?`)) {
         localShows.splice(index, 1);
-        renderAdminList();
+        renderShowsList();
       }
     }
 
@@ -296,18 +316,16 @@
         upcoming: document.getElementById('newUpcoming').checked
       });
 
-      renderAdminList();
+      renderShowsList();
       titleEl.value = '';
     }
 
-    // 4. LIVE AUF GITHUB SPEICHERN
-    function saveToGitHub() {
+    function saveShowsToGitHub() {
       if (!decryptedToken) return;
 
-      const jsonString = JSON.stringify(localShows, null, 2);
-      const base64Content = btoa(unescape(encodeURIComponent(jsonString)));
+      const base64Content = btoa(unescape(encodeURIComponent(JSON.stringify(localShows, null, 2))));
 
-      fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
+      fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePathShows}`, {
         method: "PUT",
         headers: {
           "Authorization": `token ${decryptedToken}`,
@@ -316,19 +334,160 @@
         body: JSON.stringify({
           message: "Shows aktualisiert über Web-Admin-Dashboard",
           content: base64Content,
-          sha: fileSha
+          sha: fileShaShows
         })
       })
-      .then(res => {
-        if (!res.ok) throw new Error("Fehler beim Senden.");
-        return res.json();
-      })
+      .then(res => res.json())
       .then(result => {
-        alert("Erfolgreich live gespeichert!");
-        fileSha = result.content.sha;
-        loadDataFromGitHub();
+        alert("Shows erfolgreich live gespeichert!");
+        fileShaShows = result.content.sha;
+        loadShowsFromGitHub();
       })
       .catch(err => alert("Speicherfehler: " + err.message));
+    }
+
+
+    // ── LINKS LOGIK ──────────────────────────────────────────
+    function loadLinksFromGitHub() {
+      if (!decryptedToken) return;
+
+      fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePathLinks}`, {
+        headers: { "Authorization": `token ${decryptedToken}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        fileShaLinks = data.sha;
+        const decoded = decodeURIComponent(escape(atob(data.content)));
+        localLinks = JSON.parse(decoded);
+        renderLinksList();
+      })
+      .catch(err => alert("Fehler beim Laden der Links: " + err.message));
+    }
+
+    function renderLinksList() {
+      const container = document.getElementById('linksAdminList');
+      container.innerHTML = '';
+
+      localLinks.forEach((sec, catIdx) => {
+        const isFirstCat = catIdx === 0;
+        const isLastCat = catIdx === localLinks.length - 1;
+
+        let linksHtml = '';
+        sec.links.forEach((link, linkIdx) => {
+          const isFirstLink = linkIdx === 0;
+          const isLastLink = linkIdx === sec.links.length - 1;
+
+          linksHtml += `
+            <div class="link-entry">
+              <div class="link-header">
+                <span style="font-size:0.8rem; color:var(--text-muted);">Link #${linkIdx + 1}</span>
+                <div class="controls">
+                  <button class="btn-arrow" onclick="moveLinkItem(${catIdx}, ${linkIdx}, -1)" ${isFirstLink ? 'disabled' : ''}>↑</button>
+                  <button class="btn-arrow" onclick="moveLinkItem(${catIdx}, ${linkIdx}, 1)" ${isLastLink ? 'disabled' : ''}>↓</button>
+                  <button class="btn-delete" style="padding:0.3rem 0.6rem; font-size:0.75rem;" onclick="deleteLinkItem(${catIdx}, ${linkIdx})">Löschen</button>
+                </div>
+              </div>
+              <input type="text" value="${escapeHtml(link.title)}" onchange="localLinks[${catIdx}].links[${linkIdx}].title = this.value" placeholder="Titel / Label">
+              <input type="text" value="${escapeHtml(link.url)}" onchange="localLinks[${catIdx}].links[${linkIdx}].url = this.value" placeholder="Ziel URL">
+              <input type="text" value="${escapeHtml(link.image || '')}" onchange="localLinks[${catIdx}].links[${linkIdx}].image = this.value" placeholder="Cover Pfad (z.B. assets/cover.jpg)">
+            </div>
+          `;
+        });
+
+        const categoryCard = document.createElement('div');
+        categoryCard.className = 'link-category-card';
+        categoryCard.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom: 1px solid var(--border); padding-bottom:0.5rem;">
+            <input type="text" value="${escapeHtml(sec.title)}" onchange="localLinks[${catIdx}].title = this.value" style="font-size:1.1rem; font-weight:bold; margin-bottom:0; width:50%;">
+            <div class="controls">
+              <button class="btn-arrow" onclick="moveCategory(${catIdx}, -1)" ${isFirstCat ? 'disabled' : ''}>↑ Kategorie</button>
+              <button class="btn-arrow" onclick="moveCategory(${catIdx}, 1)" ${isLastCat ? 'disabled' : ''}>↓ Kategorie</button>
+              <button class="btn-delete" onclick="deleteCategory(${catIdx})">Kategorie Löschen</button>
+            </div>
+          </div>
+          
+          <div>${linksHtml}</div>
+          <button class="btn-action" onclick="addLinkItem(${catIdx})" style="margin-top:0.8rem; width:100%;">+ Neuen Link in '${sec.title}' einfügen</button>
+        `;
+
+        container.appendChild(categoryCard);
+      });
+    }
+
+    function moveCategory(catIdx, dir) {
+      const target = catIdx + dir;
+      if (target < 0 || target >= localLinks.length) return;
+      const temp = localLinks[catIdx];
+      localLinks[catIdx] = localLinks[target];
+      localLinks[target] = temp;
+      renderLinksList();
+    }
+
+    function deleteCategory(catIdx) {
+      if(confirm(`Ganze Kategorie "${localLinks[catIdx].title}" wirklich löschen?`)) {
+        localLinks.splice(catIdx, 1);
+        renderLinksList();
+      }
+    }
+
+    function addLinkCategory() {
+      localLinks.push({ title: "NEUE KATEGORIE", links: [] });
+      renderLinksList();
+    }
+
+    function moveLinkItem(catIdx, linkIdx, dir) {
+      const target = linkIdx + dir;
+      if (target < 0 || target >= localLinks[catIdx].links.length) return;
+      const temp = localLinks[catIdx].links[linkIdx];
+      localLinks[catIdx].links[linkIdx] = localLinks[catIdx].links[target];
+      localLinks[catIdx].links[target] = temp;
+      renderLinksList();
+    }
+
+    function deleteLinkItem(catIdx, linkIdx) {
+      localLinks[catIdx].links.splice(linkIdx, 1);
+      renderLinksList();
+    }
+
+    function addLinkItem(catIdx) {
+      localLinks[catIdx].links.push({
+        title: "Neuer Link",
+        url: "https://",
+        image: "",
+        icon: "",
+        target: "_blank"
+      });
+      renderLinksList();
+    }
+
+    function saveLinksToGitHub() {
+      if (!decryptedToken) return;
+
+      const base64Content = btoa(unescape(encodeURIComponent(JSON.stringify(localLinks, null, 2))));
+
+      fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePathLinks}`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `token ${decryptedToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: "Links via Admin Dashboard aktualisiert",
+          content: base64Content,
+          sha: fileShaLinks
+        })
+      })
+      .then(res => res.json())
+      .then(result => {
+        alert("Links erfolgreich live gespeichert!");
+        fileShaLinks = result.content.sha;
+        loadLinksFromGitHub();
+      })
+      .catch(err => alert("Speicherfehler: " + err.message));
+    }
+
+    function escapeHtml(text) {
+      return (text || '').replace(/"/g, "&quot;");
     }
   </script>
 </body>
