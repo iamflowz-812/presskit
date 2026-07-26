@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FLOWZ - Drum & Bass Artist</title>
   
-  <link rel="icon" type="image/png" href="assets/favicon.png"/>
-  <link rel="shortcut icon" href="assets/favicon.png"/>
+  <!-- ── FAVICON INJEKTION FÜR GOOGLE & BROWSER ── -->
+  <link rel="icon" type="image/png" href="https://iamflowz.de/assets/favicon.png" />
+  <link rel="shortcut icon" href="https://iamflowz.de/assets/favicon.png" />
+  <link rel="apple-touch-icon" href="https://iamflowz.de/assets/favicon.png" />
   
   <meta property="og:title" content="FLOWZ - Drum & Bass Artist" />
   <meta property="og:description" content="Drum & Bass artist from Cologne. Discover his latest sets, releases, tour dates, and booking information." />
@@ -119,8 +121,8 @@
     h1 { font-family: 'Anton', sans-serif; font-size: clamp(2.5rem, 6vw, 5rem); line-height: 0.9; color: #fff; letter-spacing: 0.02em; margin-bottom: 2rem; }
     h1-1 { font-family: 'Anton', sans-serif; font-size: clamp(2.5rem, 6vw, 5rem); line-height: 0.95; color: var(--dark); letter-spacing: 0.02em; margin-bottom: 2rem; font-weight: 600; display: block;}
     h2 { font-family: 'Anton', sans-serif; font-size: clamp(3rem, 8vw, 8rem); line-height: 0.9; color: var(--dark); letter-spacing: 0.02em; margin-bottom: 3rem; }
-	#shows h1-1 { margin-bottom: 0; }
-	#shows h1-1::after { content: ""; display: block; width: 100%; height: 1px; background: rgba(255, 255, 255, 0.12); margin-top: 1rem; }
+    #shows h1-1 { margin-bottom: 0; }
+    #shows h1-1::after { content: ""; display: block; width: 100%; height: 1px; background: rgba(255, 255, 255, 0.12); margin-top: 1rem; }
 
     /* ── ABOUT ── */
     .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--border); }
@@ -261,7 +263,6 @@
     </video>
     <div class="hero-content">
       <img src="assets/logo.png" alt="FLOWZ" class="hero-logo"/>
-      <!-- BEHOBEN: Verlinkung im Hero ebenfalls auf booking Unterseite gedreht -->
       <a href="booking" class="btn-red">Booking Inquiry</a>
     </div>
   </header>
@@ -466,8 +467,8 @@
         <input type="hidden" name="_next" value="https://iamflowz.de/booking">
         <input type="text" name="_gotcha" style="display:none"/>
         <input type="text"  name="name"   placeholder="Your Name" required/>
-        <input type="email" name="email"   placeholder="Email Address" required/>
-        <input type="text"  name="event"   placeholder="Event / Venue / Date"/>
+        <input type="email" name="email"  placeholder="Email Address" required/>
+        <input type="text"  name="event"  placeholder="Event / Venue / Date"/>
         <textarea           name="message" placeholder="Message" rows="4"></textarea>
         
         <div class="g-recaptcha" data-sitekey="6Ld_XS0tAAAAAAIs2GjdwNf5xaRuRIoWf0GU-5pR" data-theme="dark" style="margin-bottom: 0.5rem;"></div>
